@@ -56,25 +56,25 @@ server {
 
     # --- 3. Home Page (Host Based) ---
     location = / {
-        root /var/www/billing;
+        root /var/www/admin;
         try_files /index.html =404;
     }
 
     # --- 4. Specific Static File Exception ---
     location = /status.html {
-        root /var/www/billing;
+        root /var/www/admin;
     }
 
     # --- 5. Static Images (Host Based) ---
     location /images/ {
-        root /var/www/billing;
+        root /var/www/admin;
         expires 30d;
         access_log off;
     }
 
     # --- 6. Shared Resources (Host Based) ---
     location /shared/ {
-        root /var/www/billing;
+        root /var/www/admin;
         expires 30d;
         access_log off;
     }

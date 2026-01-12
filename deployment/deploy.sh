@@ -27,7 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Deployment targets
-WWW_TARGET="/var/www/billing"
+WWW_TARGET="/var/www/admin"
 NGINX_TARGET="/etc/nginx/sites-available"
 NGINX_SITE="admin.gcbehavioral.com"
 
