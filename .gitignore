@@ -1,0 +1,38 @@
+# SSL Certificates and Keys (NEVER COMMIT)
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp

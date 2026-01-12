@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCB Admin Portal</title>
+    <!-- Using Tailwind via CDN for consistent styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body style="background-color: #eef2f7;" class="text-gray-900 font-sans">
+    
+    <div class="container mx-auto p-4 max-w-[1400px]">
+        
+        <!-- GLOBAL NAVIGATION (Shared) -->
+        <div id="global-header"></div>
+
+        <!-- BILLING & CLAIMS SECTION -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 px-2 uppercase tracking-wider">Billing & Claims</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Procedure Sync Card -->
+                <a href="/billing/sync" class="block bg-white p-8 rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:border-purple-300 transition-all duration-200 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#005a9c]">Procedure Sync</h2>
+                    <p class="text-gray-500">Trigger synchronization of procedure data from external sources for specified date ranges.</p>
+                </a>
+
+                <!-- Claims Generator Card -->
+                <a href="/billing/wizard" class="block bg-white p-8 rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:border-blue-300 transition-all duration-200 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#005a9c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#005a9c]">Claims Generator</h2>
+                    <p class="text-gray-500">Create, preview, and submit new 837P claims. Review conflicts and authorize billing.</p>
+                </a>
+
+                <!-- Claims Status Card -->
+                <a href="/billing/status" class="block bg-white p-8 rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:border-green-300 transition-all duration-200 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#005a9c]">Claims Status</h2>
+                    <p class="text-gray-500">View history of submitted claims, track payments, and review archived records.</p>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- PAYROLL SECTION -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 px-2 uppercase tracking-wider">Payroll</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Payroll Management Card -->
+                <a href="/payroll" class="block bg-white p-8 rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:border-emerald-300 transition-all duration-200 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#005a9c]">Payroll Management</h2>
+                    <p class="text-gray-500">Generate payroll documents for contractors based on paid claims and manage payment distributions.</p>
+                </a>
+
+                <!-- Payroll Status Card -->
+                <a href="/payroll/status" class="block bg-white p-8 rounded-lg shadow-md border border-gray-200 hover:shadow-xl hover:border-emerald-300 transition-all duration-200 group">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="p-3 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#005a9c]">Payroll Status</h2>
+                    <p class="text-gray-500">View scheduled payroll and historical payroll records with detailed contractor information.</p>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- GLOBAL FOOTER (Shared) -->
+        <div id="global-footer"></div>
+
+    </div>
+
+    <script>
+        // Load Header
+        fetch('/shared/header.html')
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('global-header').innerHTML = html;
+            });
+
+        // Load Footer
+        fetch('/shared/footer.html')
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('global-footer').innerHTML = html;
+                // Only set the year AFTER the footer HTML has been injected
+                const yearSpan = document.getElementById('copyright-year');
+                if (yearSpan) {
+                    yearSpan.textContent = new Date().getFullYear();
+                }
+            });
+
+        // Load User Info
+        fetch('/auth/me')
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Not authenticated');
+            })
+            .then(user => {
+                const placeholder = document.getElementById('user-menu-placeholder');
+                const avatar = user.picture || '';
+                const initial = user.name ? user.name.charAt(0) : 'U';
+                
+                const html = `
+                <div class="group relative">
+                    <button class="flex items-center gap-3 focus:outline-none hover:opacity-100 transition-opacity py-2 text-white">
+                        <span class="hidden md:inline">${user.name}</span>
+                        ${avatar ? 
+                            `<img src="${avatar}" alt="User" class="w-8 h-8 rounded-full border-2 border-white/50">` : 
+                            `<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/50"><span class="text-xs">${initial}</span></div>`
+                        }
+                        <span class="text-xs opacity-75">▼</span>
+                    </button>
+                    <div class="absolute right-0 top-full pt-2 w-48 hidden group-hover:block origin-top-right z-50">
+                        <div class="bg-white rounded-lg shadow-xl py-1 text-gray-800 border border-gray-100 text-left">
+                            <div class="px-4 py-2 border-b border-gray-100 text-xs text-gray-500">
+                                Signed in as <br><strong class="text-gray-700">${user.name}</strong>
+                            </div>
+                            <a href="/auth/logout" class="block px-4 py-2 text-red-600 hover:bg-red-50 text-sm no-underline">Sign Out</a>
+                        </div>
+                    </div>
+                </div>`;
+                placeholder.innerHTML = html;
+            })
+            .catch(err => console.log('User not logged in', err));
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1687 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Claims Status</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="./images/favicon.ico" type="image/x-icon">
+        <style>
+    :root { --bg-color: #eef2f7; --text-color: #333; --header-bg: #fff; --border-color: #ddd; --accent-color: #005a9c; --paid-bg: #e6f7ec; --paid-text: #006421; --denied-bg: #fdeaea; --denied-text: #c00000; --accepted-bg: #fffbe6; --accepted-text: #8a6d3b; --pending-bg: #e6f0f7; --pending-text: #005a9c; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+    .global-nav { background-color: var(--accent-color); color: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 100; }
+    .global-nav h1 { margin: 0; font-size: 20px; font-weight: 700; }
+    .global-nav a { text-decoration: none; color: white; }
+    .global-nav .nav-right { display: flex; align-items: center; gap: 20px; }
+
+    .dropdown-group { position: relative; }
+    .dropdown-wrapper { position: absolute; top: 100%; right: 0; padding-top: 10px; display: none; z-index: 200; }
+    .dropdown-group:hover .dropdown-wrapper { display: block; }
+    .dropdown-content { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid #e5e7eb; overflow: hidden; color: #333; width: 220px; }
+
+    .app-launcher-btn { background: none; border: none; color: white; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; cursor: pointer; padding: 5px; border-radius: 4px; opacity: 0.9; transition: opacity 0.2s; }
+    .app-launcher-btn:hover { background-color: rgba(255,255,255,0.1); opacity: 1; }
+    .app-launcher-icon { width: 20px; height: 20px; }
+
+    .app-header { padding: 8px 16px; border-bottom: 1px solid #f3f4f6; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; text-align: left; }
+    .app-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; text-decoration: none !important; color: #111827 !important; transition: background-color 0.2s; text-align: left; }
+    .app-item:hover { background-color: #f9fafb; }
+    .app-item-icon { padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .icon-blue { background-color: #eff6ff; color: #005a9c; }
+    .icon-green { background-color: #f0fdf4; color: #15803d; }
+    .app-item-name { font-size: 14px; font-weight: 500; }
+
+    .user-menu-btn { background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; color: white; font-weight: 600; font-size: 14px; padding: 5px; opacity: 0.9; transition: opacity 0.2s; }
+    .user-menu-btn:hover { opacity: 1; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); object-fit: cover; }
+    .user-initial { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); background-color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+    .user-info { padding: 8px 16px; border-bottom: 1px solid #f3f4f6; font-size: 12px; color: #6b7280; text-align: left; }
+    .user-info strong { display: block; color: #374151; margin-top: 2px; }
+    .dropdown-content a.logout-link { display: block; padding: 8px 16px; color: #dc2626 !important; text-decoration: none !important; font-size: 14px; text-align: left; margin: 0 !important; }
+    .dropdown-content a.logout-link:hover { background-color: #fef2f2; }
+
+    .hidden-mobile { display: none; }
+    @media (min-width: 768px) { .hidden-mobile { display: inline; } }
+
+    @media (max-width: 768px) {
+        .container { padding: 10px; }
+        .global-nav { flex-direction: column; text-align: center; gap: 10px; }
+        .global-nav h1 { margin-bottom: 5px; }
+        .global-nav .nav-right { flex-direction: row; gap: 20px; }
+        .dropdown-wrapper { left: 50%; right: auto; transform: translateX(-50%); }
+    }
+
+    header { background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    header h1 { margin: 0; color: var(--accent-color); }
+    header p { margin: 5px 0 0; font-style: italic; color: #777; }
+    .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+    .tab-button { padding: 10px 20px; cursor: pointer; background-color: transparent; border: none; font-size: 16px; font-weight: 600; color: #888; border-bottom: 4px solid transparent; margin-bottom: -2px; }
+    .tab-button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+    .tab-content { display: none; animation: fadeIn 0.5s; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .sub-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+    .sub-tab-button { padding: 8px 16px; cursor: pointer; background-color: transparent; border: none; font-size: 14px; font-weight: 600; color: #777; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+    .sub-tab-button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+    .sub-tab-content { display: none; animation: fadeIn 0.5s; }
+    .sub-tab-content.active { display: block; }
+    table.responsive-table { width: 100%; border-collapse: collapse; background-color: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    table.responsive-table th, table.responsive-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    table.responsive-table thead th { background-color: #f9f9f9; font-size: 12px; text-transform: uppercase; color: #555; }
+    table.responsive-table tbody tr:hover { background-color: #f5f5f5; }
+    a { color: var(--accent-color); text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    .links-cell { white-space: nowrap; }
+    .status { padding: 4px 8px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
+    .status-paid { background-color: var(--paid-bg); color: var(--paid-text); }
+    .status-denied { background-color: var(--denied-bg); color: var(--denied-text); }
+    .status-accepted { background-color: var(--accepted-bg); color: var(--accepted-text); }
+    .status-pending { background-color: var(--pending-bg); color: var(--pending-text); }
+    .status-unknown { background-color: #eee; color: #555; }
+    .search-box { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+    .accordion-title-main { margin-top: 25px; color: #555; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+    .accordion-title { background-color: #fff; border: 1px solid var(--border-color); padding: 15px; cursor: pointer; width: 100%; text-align: left; font-size: 16px; font-weight: 600; margin-top: 5px; border-radius: 6px; }
+    .accordion-title:hover { background-color: #f9f9f9; }
+    .accordion-content { display: none; padding: 15px; border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 6px 6px; margin-bottom: 5px; background-color: #fff; }
+
+    @media (max-width: 768px) {
+        header { padding: 15px; }
+        header h1 { font-size: 24px; }
+        .tabs { font-size: 14px; }
+        .tab-button { padding: 10px 12px; font-size: 14px; }
+        .sub-tab-button { padding: 8px 10px; font-size: 13px; }
+        table.responsive-table { background-color: transparent; box-shadow: none; border: none; }
+        table.responsive-table thead { display: none; }
+        table.responsive-table tr { display: block; background-color: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 15px; border: 1px solid var(--border-color); }
+        table.responsive-table td { display: block; text-align: right; padding-left: 38%; position: relative; border-bottom: 1px solid var(--border-color); }
+        table.responsive-table td:last-child { border-bottom: none; }
+        table.responsive-table td::before { content: attr(data-label); position: absolute; left: 10px; width: 35%; padding-right: 10px; text-align: left; font-weight: bold; color: #333; white-space: normal; }
+        table.responsive-table td.links-cell { white-space: normal; }
+        table.responsive-table td[data-label="Claim ID"], table.responsive-table td[data-label="Payer Claim #"], table.responsive-table td[data-label="Check/Trace #"] { word-break: break-word; white-space: normal; overflow-wrap: break-word; }
+        table.responsive-table td[data-label="Patient Name"] { white-space: normal; }
+        .accordion-content { padding: 10px 5px; background-color: transparent; border: none; box-shadow: none; }
+    }
+    </style>
+    </head>
+    <body>
+        <div class="container">
+            <div id="global-header"></div>
+
+            <header>
+                <h2 class="text-2xl font-bold text-[#005a9c] mb-2">Claims Status</h2>
+                <p>Last Updated: 2026-01-12 01:45 PM EST</p>
+            </header>
+
+            <div class="tabs">
+                <button class="tab-button" onclick="openTab(event, 'tab-active')">Active Claims</button>
+                <button class="tab-button" onclick="openTab(event, 'tab-paid')">Recently Paid</button>
+                <button class="tab-button" onclick="openTab(event, 'tab-resolved')">Resolved Archive</button>
+            </div>
+
+            <div id="tab-active" class="tab-content">
+                
+    <input type="text" id="active-search" class="search-box" onkeyup="filterTable('active-search', 'active-table')" placeholder="Search active claims...">
+    <table id="active-table" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payer Claim #</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">20756P260104X260110I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">01/12/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">Q100001291908800</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1bF6LVYu56VYRro5MbTejgNbsobGkFdBv/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P260104X260110I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">01/12/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">Q100001291915329</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1EpNJY6UIGC_hQIQMSAE79dxW1qVo0Zfl/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P260104X260110I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">01/12/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">Q100001291908805</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1MdWUnSvEjBbF9_1sG2NgnnNK9ICq4cUn/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251227X251231I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">26005-7Q2G3T000</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1CG-1W0JQFacYn_crSwso9DAYsD5_swvC/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P260104X260110I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">01/12/2026</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">NA</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1TWrtuzYfB7nQ6cf4rw7P83lUMw6cpzdd/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P260104X260110I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">01/12/2026</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-accepted" >accepted</span></td>
+            <td data-label="Payer Claim #">NA</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/11NnVCdGEXZ8UvjA73d_MwcT9VMvPMR3s/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+            </div>
+
+            <div id="tab-paid" class="tab-content">
+                
+    <div class="sub-tabs">
+        <button class="sub-tab-button paid-sub-tab active" onclick="openSubTab(event, 'paid', 'paid-claims')">Claims</button>
+        <button class="sub-tab-button paid-sub-tab" onclick="openSubTab(event, 'paid', 'paid-payments')">Payments</button>
+    </div>
+    <div id="paid-claims" class="sub-tab-content paid-sub-content active">
+        
+    <input type="text" id="paid-claims-search" class="search-box" onkeyup="filterTable('paid-claims-search', 'paid-claims-table')" placeholder="Search recently paid claims...">
+    <table id="paid-claims-table" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payer Claim #</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">23246P260101X260103I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid" title="Payment Date: Jan 12, 2026">Paid</span></td>
+            <td data-label="Payer Claim #">9432600502936</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1HA7GiPU5kUEC3SjNPeWLwaHj7aqD2JsJ/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1truLVq6DT8lwRQMx6XFquAk8KdMz4Om5/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P251228X251231I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid" title="Payment Date: Jan 12, 2026">Paid</span></td>
+            <td data-label="Payer Claim #">EFFDS4G2N0000,EFFDS4G2N0002</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1A5EWA0IEunn8j6wEvsrLvVJlWC12Gvii/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1KrIbFOGZis_RHRiOZ0oqJlmwMC2JOwGF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+    </div>
+    <div id="paid-payments" class="sub-tab-content paid-sub-content">
+        
+    <input type="text" id="paid-payments-search" class="search-box" onkeyup="filterTable('paid-payments-search', 'paid-payments-table')" placeholder="Search recent payments...">
+    <table id="paid-payments-table" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Payment Date</th>
+                <th>Payer</th>
+                <th>Check/Trace #</th>
+                <th>Total Amount</th>
+                <th># of Claims</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Payment Date">Jan 12, 2026</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">826007000310639</td>
+            <td data-label="Total Amount">$1,350.62</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1KrIbFOGZis_RHRiOZ0oqJlmwMC2JOwGF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 12, 2026</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">260108090025460</td>
+            <td data-label="Total Amount">$632.00</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1truLVq6DT8lwRQMx6XFquAk8KdMz4Om5/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+    </div>
+    
+            </div>
+
+            <div id="tab-resolved" class="tab-content">
+                
+    <div class="sub-tabs">
+        <button class="sub-tab-button archive-sub-tab active" onclick="openSubTab(event, 'archive', 'archive-claims')">Claims</button>
+        <button class="sub-tab-button archive-sub-tab" onclick="openSubTab(event, 'archive', 'archive-payments')">Payments</button>
+    </div>
+    <div id="archive-claims" class="sub-tab-content archive-sub-content active">
+        <h3 class="accordion-title-main">Current Month</h3>
+<h4 class="accordion-title">Week: Jan 05 - Jan 11, 2026 (8 claims)</h4>
+<div class="accordion-content">
+<input type="text" id="search-table-WeekJan05Jan112026" class="search-box" onkeyup="filterTable('search-table-WeekJan05Jan112026', 'table-WeekJan05Jan112026')" placeholder="Search Week: Jan 05 - Jan 11, 2026...">
+
+    <table id="table-WeekJan05Jan112026" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">22056P260101X260103I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 09, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1EeP3ebMNxFqrkbxNzu7lNfnE0lS3wr7J/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1jPQavDR9GCO8G1TN1ribVgG7T_o03zDO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P260101X260103I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 09, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1naYsGgIjtWUBOVHDAwTkFYyW08mYvInU/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1jPQavDR9GCO8G1TN1ribVgG7T_o03zDO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251228X251231I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 09, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/137unwwjJ3aQUYDFwKtSDnWmzJ0GufoN1/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1jPQavDR9GCO8G1TN1ribVgG7T_o03zDO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P251228X251231I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">01/05/2026</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 09, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Y-xmPNGwLHJ1VUl4LRwWvpHYsrHOlUI8/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1jPQavDR9GCO8G1TN1ribVgG7T_o03zDO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P251221X251227I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">12/29/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/10CzaDqiJMGft7SLwHENKq7eILRmH_xrh/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1jddAX9XT-IsDFgMW1Ke_v3yjLdg5cAja/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251221X251227I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/29/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/15ZEFoTtMemOw_RqoUT4adIwewXIYx7Nj/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1X0yRdIwkEjLRRkcEQXMZ6TfflNIFGKQz/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P251207X251213I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1H5CA6ngUynxjEBE5HyV7VoWQ9A9Bl_fK/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/17tr32_DetfuSdZtGYGTZoV817Fbv5OCZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P251207X251213I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1HgqrdRsWFZGs_5L0IqjtHTvJGVzBDgFZ/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/17tr32_DetfuSdZtGYGTZoV817Fbv5OCZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+</div>
+<h4 class="accordion-title">Week: Dec 29 - Jan 04, 2026 (4 claims)</h4>
+<div class="accordion-content">
+<input type="text" id="search-table-WeekDec29Jan042026" class="search-box" onkeyup="filterTable('search-table-WeekDec29Jan042026', 'table-WeekDec29Jan042026')" placeholder="Search Week: Dec 29 - Jan 04, 2026...">
+
+    <table id="table-WeekDec29Jan042026" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">22056P251221X251227I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/29/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/10wtN4Nggu4gMn0VHIoYtKYSDylJQTiVM/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1N4l44GR63Kp01AvJftSFN85m_tQhe5Th/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P251221X251227I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">12/29/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1BUcCepFTPTHEYmFkMie9U-dY8vHS4Mzy/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1N4l44GR63Kp01AvJftSFN85m_tQhe5Th/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251214X251220I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/145LTAOMr206UjT7ADoBF8NBEt_4ySGVE/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1Ps-rO3whYnAIVDYfbmXAu1pwu8V-vKMa/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251214X251220I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1ZDVyltQ8BHrfLwG0EtpnZVnYpScjMsox/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1Ps-rO3whYnAIVDYfbmXAu1pwu8V-vKMa/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+</div>
+<h3 class="accordion-title-main">Past Months</h3>
+<h4 class="accordion-title">October 2025 (6 claims)</h4>
+<div class="accordion-content">
+<input type="text" id="search-table-October2025" class="search-box" onkeyup="filterTable('search-table-October2025', 'table-October2025')" placeholder="Search October 2025...">
+
+    <table id="table-October2025" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">24751P20251012X20251018I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/21/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 31, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1yhmOJaQiWucEoaCm1Jkyj4ROFfQrGFaG/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251012X20251018I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/21/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 31, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1dNmw8lD-bbAN2IQs7xNQGvywUWk6io0U/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251002X20251011I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/13/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 22, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Q1BC55IdRy6Bd-BnACnmlGa-1aCdLWTx/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251002X20251011I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/13/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 22, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1QWFxTjDIdZlPPMuDNr7TJetVhgGd2VR2/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251002X20251002I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/02/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 15, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1t1wJBb-LprhdogbM0bBfVAUUYpbjR1rO/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20250921X20250927I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">09/29/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Oct 08, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1FH3nxAI-cKWdHm8TXZ979RGGzYfg6Kye/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+</div>
+<h4 class="accordion-title">November 2025 (29 claims)</h4>
+<div class="accordion-content">
+<input type="text" id="search-table-November2025" class="search-box" onkeyup="filterTable('search-table-November2025', 'table-November2025')" placeholder="Search November 2025...">
+
+    <table id="table-November2025" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">22056P20251116X20251122I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 28, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1gW8I7sqCAzYT5dG4tfzzHhIJUyMDh6Ih/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1UJ5e3jcu-qOOyTlIbn_y5P4En4cZrHji/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251116X20251122I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 28, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1oxdNstw2Qas0Lgu0wQtUyp5GcA-iEr3x/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1UJ5e3jcu-qOOyTlIbn_y5P4En4cZrHji/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P20251116X20251122I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 28, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1PQfNA7_O2BxuyqYe3E2gNET1d664YXtX/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1UJ5e3jcu-qOOyTlIbn_y5P4En4cZrHji/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251109X20251115I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 21, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Q0nt9PYiyibSYm5sPby2LsWPY13eiwr_/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1J0DOWHPh1sYHgcjs3UjPCljoBCQw_fVE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P20251109X20251115I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 24, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/15REFLQegrcW-igmi7oEHjdg9K-4KCUQ5/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251109X20251115I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 21, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1CVYwbDkXcGARPkwKwWg9ppi12wmNLvq2/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1J0DOWHPh1sYHgcjs3UjPCljoBCQw_fVE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251109X20251115I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 24, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1xmCxt8LLWAKDesRdkwR_rjXNdbZdbv9Z/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251109X20251115I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 24, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1TrR856qD2GkspRMIk-6SdkDCqqtMgHbB/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P20251109X20251115I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 21, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1b_8ru8Fu0MYctT2leu3qGWmUXmXRdqlo/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1J0DOWHPh1sYHgcjs3UjPCljoBCQw_fVE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251102X20251108I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 14, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1nsrVQwzL9QppUp4ny_nn0czO9VI6p69h/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1rswRYylGcIWsZwCK0UbFkW-6KN1UafKp/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P20251102X20251108I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 17, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1rL22eckO7cZtVjybvstfPG6QTRF0CIH3/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251102X20251108I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 25, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/12TytWKxytjjRy54AqRU1Iu9XTHXLcVIm/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251102X20251108I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 25, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1NjKA7YAiyIY5asFxVOY2bbJTsY5IQwX5/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251102X20251108I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 17, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1j4rYYRBbIo3lzPNbMKn7uXse5yVDLAJT/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251102X20251108I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 17, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/11kRAaS6VZuzjXAin1o65XmwPVVHcJEqs/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251102X20251108I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 14, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1G4prTWPezUI4odsgbW63dLGC794LO7_j/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1rswRYylGcIWsZwCK0UbFkW-6KN1UafKp/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P20251102X20251108I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">11/10/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 14, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1jPg1TZvyMkTnqfl9vZF_w3SFEtO1FVi8/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1rswRYylGcIWsZwCK0UbFkW-6KN1UafKp/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251026X20251101I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 10, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1BX5yOg8fhOLYfwjcQEfdfdW8ZojTt9F9/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251026X20251101I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 10, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1748YmvNAg8RJ_N9KpNOwZtjwqrI9-BZl/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P20251026X20251101I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 10, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1ETB9NeUOO93oYaxw_4zshvA8H8EF73Ju/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P20251026X20251101I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 07, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1yo8IMStaFxBvziGUdu5dajSEObyK3XJm/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1r-pL6XE7_-oW3tZVscNgEgrPBeDxvopq/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251026X20251101I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 07, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1mryApzib1UCQRGybJUXUvPBw5ydpCkx-/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1r-pL6XE7_-oW3tZVscNgEgrPBeDxvopq/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251026X20251101I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 18, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/19sgBrvsnEUUvhXGJb64zujQY17-hQRF9/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251026X20251101I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 19, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1LoA7hH5faFHMrdLoec0ERw8dmZCUIsR2/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251026X20251101I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">11/03/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 07, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1LTsUbBFO3Ymo-bPPEDI9lsfqILNykEZq/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1r-pL6XE7_-oW3tZVscNgEgrPBeDxvopq/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251019X20251025I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/27/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 06, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/11oXPaW9NcFuilj7SabGXqBv5DYE_6PWz/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251019X20251025I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">10/27/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 03, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1kx6qWknRvYSPQRdCvtvrjdZMHJ0-XiBR/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251019X20251025I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">10/27/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 03, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1qqaLOjKLiFAup4pxjqiqLLrGqdAImHym/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251019X20251025I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">10/27/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Nov 06, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/18XlSTLf7gFibILFQHLV0lFmrnJhmmdyb/view?usp=drivesdk" target="_blank">View Claim</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+</div>
+<h4 class="accordion-title">December 2025 (31 claims)</h4>
+<div class="accordion-content">
+<input type="text" id="search-table-December2025" class="search-box" onkeyup="filterTable('search-table-December2025', 'table-December2025')" placeholder="Search December 2025...">
+
+    <table id="table-December2025" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Internal Claim ID</th>
+                <th>Patient Name</th>
+                <th>Claim Date</th>
+                <th>Payer</th>
+                <th>Status</th>
+                <th>Payment Date</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Claim ID">22056P251214X251220I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1cDapdwyHpWVPmgRJIWwTjqeZasXIwiYo/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1k37MU0IlnPTMjfxhKMo5t9IOGqBhPicF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251214X251220I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1rT-bMqkLPPRGBiVXrdcnADJGZpT7CyxA/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1k37MU0IlnPTMjfxhKMo5t9IOGqBhPicF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P251214X251220I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1W0l2qLuVLxX_TOb8X7wkb-3a9LFTGcgZ/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1k37MU0IlnPTMjfxhKMo5t9IOGqBhPicF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P251214X251220I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">12/22/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 30, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/12XsgTq46XrpZBUBMh30jiL8M7VfnK898/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/124YMy5tx5CdaTecCnUPqif3a-eqzrkqa/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251207X251213I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 19, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1mrGHaEnmYQjT1EpORO7NgcSo6qY2DRQJ/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1cPRS5qGzYgqGwowfmZFAfI3YDfWtX7A1/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P251207X251213I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 22, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1-BoGcZ5REyy3huLEZ8IEOR64-78Cfidm/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1T-3czG4hNDU8lQi1iRhjUd6sXue3RYEr/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251207X251213I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 22, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1sUUAAjR35Ps0emCv4cVcrKV4sBPioxZF/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1UM8S5wUYBS71YqgBd9py-_EOQ96SEZqZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251207X251213I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 22, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Gj34HvMSuDUZ46pD5hVipzRcaxLYC9fR/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1UM8S5wUYBS71YqgBd9py-_EOQ96SEZqZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251207X251213I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 19, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1OXFrLFvzP3MThFZGeaWbimzVtIiLMdwE/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1cPRS5qGzYgqGwowfmZFAfI3YDfWtX7A1/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P251207X251213I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">12/15/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 19, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1m7vnkVVPv-j4bFM9b2QtJCQykwmnClij/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1cPRS5qGzYgqGwowfmZFAfI3YDfWtX7A1/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251130X251206I03</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 12, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/11r2RCDgYVF18qt1AmuhmgQyCG2xJTWCY/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1Q_E_SGGPP8h5IXlvY10etdT3QKFsHgKQ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P251130X251206I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 15, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1XYPNblJtcO92c-csJbayRcg7z0SrW47s/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1unRelA97M1SQIfOr_HI2JY7wRZGm60q4/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P251130X251206I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1uPwrbjNM_0PMJUf-4CLlnpxfR6VaRoNZ/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/15bScuFbWz2rcVTzHaFQgl0NWplAekCqE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P251130X251206I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1aryB8qvRYWRwzjt93VhF1CYBOhXjDZqo/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/15bScuFbWz2rcVTzHaFQgl0NWplAekCqE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251130X251206I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 15, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Hfj6QGkCTCoME43wtbhNa-jcOZIRtNwd/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1FvEU5fAZxUt0mlRjG6lBH6j1FbKc7Xpc/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P251130X251206I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 15, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1X_I3U-9aNYScqLAOyVwyrVR9LXhBZIts/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1FvEU5fAZxUt0mlRjG6lBH6j1FbKc7Xpc/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P251130X251206I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 12, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1hQmcDzSJtC9_FSsUOKcEAR5UHXHjfRZU/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1Q_E_SGGPP8h5IXlvY10etdT3QKFsHgKQ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P251130X251206I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">12/08/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 12, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1H5QOEEGdxNx5eIG9-mGiN4T143oEPri_/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1Q_E_SGGPP8h5IXlvY10etdT3QKFsHgKQ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P20251123X20251129I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 08, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1QMKOyZht3id0ZbCkPgwMy2swld42sUas/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1YlLe0vry0l5bLK4MSXk4Otk2TLTOx-la/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251123X20251129I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 16, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/15OV918nYTleXE3IKWk0sBkXF0avJ8eSE/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1NJ2MlTLx3aTs4-Cl0-r0g8gdgROFwNet/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">20756P20251123X20251129I12</td>
+            <td data-label="Patient Name">GOMEZ CARBALLO, VICTOR</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 05, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Yi-6SuS4bineItwJhCdgAzO9fV2kWNLo/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1fQZXKnhWHnJRbL2YLeGK2Xuksjrdh1RL/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">22056P20251123X20251129I12</td>
+            <td data-label="Patient Name">CUAREZMA, NELSON</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">FLORIDA BLUE (BCBS FLORIDA)</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 05, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1VRKRyd_u0jGzd5-_ArVBSuzkPIwQf0Q0/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1fQZXKnhWHnJRbL2YLeGK2Xuksjrdh1RL/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251123X20251129I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 08, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1sTQyKzNxKGk5RC2sPv2yUSR3pnCJZA8z/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1_I5hMUjsbVjrAsNqa7qLRurCbOGK_Id5/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251123X20251129I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">12/01/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 16, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/12TpjQNRW4TFa0U-ylXMNsLRmC4XnyxSL/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1NJ2MlTLx3aTs4-Cl0-r0g8gdgROFwNet/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">25162P20251116X20251122I12</td>
+            <td data-label="Patient Name">PINEDA DAVILA, SEBASTIAN</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1k1Xvm8DKN2c4sBZDREE1fbIjq1zaouZ1/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1EOp3OlCDDD0LFhM_Xw-wPyruP61Af7-A/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251116X20251122I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 09, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1K42z0YaSZRSswHt2dvsSp5Tov0WXwSC8/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1YLX1hA_TpV79Qi1thU5dc9_hPYPKtP1a/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251116X20251122I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 09, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1EkTF1nAouufprk28gOEqIc0FJcmV4pQy/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1YLX1hA_TpV79Qi1thU5dc9_hPYPKtP1a/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251116X20251122I12</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 03, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1dxDHoehTdikXuG-j248mzAuIt7jAZNiS/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1ktKDinCKjbjFLIGznm9GSo_hfimvrDY8/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">23246P20251116X20251122I03</td>
+            <td data-label="Patient Name">PIERRE, NOAH</td>
+            <td data-label="Claim Date">11/24/2025</td>
+            <td data-label="Payer">CIGNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 03, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/15JuOhW5nzEfQc_PvsAYVSl0R27V3mkpn/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1ktKDinCKjbjFLIGznm9GSo_hfimvrDY8/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251109X20251115I12</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1XCmY8RYUpGOx-VjXInGm3IuRJiOtJjsc/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1_magFYiwmFr5B1-fvyssmul_sVaiLCjZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Claim ID">24751P20251109X20251115I03</td>
+            <td data-label="Patient Name">MACHADO, MILAN</td>
+            <td data-label="Claim Date">11/17/2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Status"><span class="status status-paid">Paid</span></td>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/18-ppRZkZvDdKi1q0vs2O7BGRDnbwOdam/view?usp=drivesdk" target="_blank">View Claim</a> | <a href="https://drive.google.com/file/d/1T1ipoYGAqARDCLqFb__xS6naQg1A5g7M/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+</div>
+    </div>
+    <div id="archive-payments" class="sub-tab-content archive-sub-content">
+        
+    <input type="text" id="archive-payments-search" class="search-box" onkeyup="filterTable('archive-payments-search', 'archive-payments-table')" placeholder="Search archived payments...">
+    <table id="archive-payments-table" class="responsive-table">
+        <thead>
+            <tr>
+                <th>Payment Date</th>
+                <th>Payer</th>
+                <th>Check/Trace #</th>
+                <th>Total Amount</th>
+                <th># of Claims</th>
+                <th>Links</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td data-label="Payment Date">Jan 09, 2026</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705763401</td>
+            <td data-label="Total Amount">$3,580.60</td>
+            <td data-label="# of Claims">4 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1jPQavDR9GCO8G1TN1ribVgG7T_o03zDO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251231090017437</td>
+            <td data-label="Total Amount">$1,504.00</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1X0yRdIwkEjLRRkcEQXMZ6TfflNIFGKQz/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">826001000360881</td>
+            <td data-label="Total Amount">$2,286.48</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/17tr32_DetfuSdZtGYGTZoV817Fbv5OCZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 06, 2026</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825365000328135</td>
+            <td data-label="Total Amount">$1,643.45</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1jddAX9XT-IsDFgMW1Ke_v3yjLdg5cAja/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705755729</td>
+            <td data-label="Total Amount">$3,461.60</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1N4l44GR63Kp01AvJftSFN85m_tQhe5Th/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Jan 02, 2026</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251230090022284</td>
+            <td data-label="Total Amount">$1,428.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Ps-rO3whYnAIVDYfbmXAu1pwu8V-vKMa/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 30, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825358000336992</td>
+            <td data-label="Total Amount">$1,659.64</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/124YMy5tx5CdaTecCnUPqif3a-eqzrkqa/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825356000215724</td>
+            <td data-label="Total Amount">$2,344.52</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/15bScuFbWz2rcVTzHaFQgl0NWplAekCqE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 26, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705748282</td>
+            <td data-label="Total Amount">$3,467.20</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1k37MU0IlnPTMjfxhKMo5t9IOGqBhPicF/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 22, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251218090027278</td>
+            <td data-label="Total Amount">$1,504.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1UM8S5wUYBS71YqgBd9py-_EOQ96SEZqZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 22, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825351000090590</td>
+            <td data-label="Total Amount">$1,534.39</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1T-3czG4hNDU8lQi1iRhjUd6sXue3RYEr/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 19, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705739655</td>
+            <td data-label="Total Amount">$3,461.60</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1cPRS5qGzYgqGwowfmZFAfI3YDfWtX7A1/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 16, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825345000339618</td>
+            <td data-label="Total Amount">$2,344.52</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1NJ2MlTLx3aTs4-Cl0-r0g8gdgROFwNet/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 15, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251211090029551</td>
+            <td data-label="Total Amount">$1,428.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1FvEU5fAZxUt0mlRjG6lBH6j1FbKc7Xpc/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 15, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825344000316189</td>
+            <td data-label="Total Amount">$1,784.89</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1unRelA97M1SQIfOr_HI2JY7wRZGm60q4/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 12, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705731361</td>
+            <td data-label="Total Amount">$3,461.60</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1Q_E_SGGPP8h5IXlvY10etdT3QKFsHgKQ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 09, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825338000525949</td>
+            <td data-label="Total Amount">$2,344.52</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1YLX1hA_TpV79Qi1thU5dc9_hPYPKtP1a/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 08, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825337000205019</td>
+            <td data-label="Total Amount">$1,518.20</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1YlLe0vry0l5bLK4MSXk4Otk2TLTOx-la/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 08, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251204090029196</td>
+            <td data-label="Total Amount">$1,428.00</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1_I5hMUjsbVjrAsNqa7qLRurCbOGK_Id5/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 05, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705722744</td>
+            <td data-label="Total Amount">$3,385.60</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1fQZXKnhWHnJRbL2YLeGK2Xuksjrdh1RL/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 03, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251129090034677</td>
+            <td data-label="Total Amount">$1,580.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1ktKDinCKjbjFLIGznm9GSo_hfimvrDY8/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825330000504959</td>
+            <td data-label="Total Amount">$1,659.64</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1EOp3OlCDDD0LFhM_Xw-wPyruP61Af7-A/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825331000260202</td>
+            <td data-label="Total Amount">$1,511.72</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1T1ipoYGAqARDCLqFb__xS6naQg1A5g7M/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Dec 02, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825330000504960</td>
+            <td data-label="Total Amount">$774.76</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1_magFYiwmFr5B1-fvyssmul_sVaiLCjZ/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 28, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705714819</td>
+            <td data-label="Total Amount">$3,543.20</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1UJ5e3jcu-qOOyTlIbn_y5P4En4cZrHji/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 25, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825324000191814</td>
+            <td data-label="Total Amount">$2,344.52</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1RddDFJk-pxpHqOZ_z8wvN3zn9FmOEmD5/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 24, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251120090028877</td>
+            <td data-label="Total Amount">$1,580.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1BhN7QPQNXO4_gWzPZkX5hsrrlxaH7sTC/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 24, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825323000120994</td>
+            <td data-label="Total Amount">$1,534.39</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1WNSwBMPNbjoCLQ2gB2Q0bbH8MJixneP6/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 21, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705706196</td>
+            <td data-label="Total Amount">$3,467.20</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1J0DOWHPh1sYHgcjs3UjPCljoBCQw_fVE/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 19, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825318000081554</td>
+            <td data-label="Total Amount">$1,918.00</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1_hMNztNqg1CbmlmhPwsWL5-qqHlfHmyt/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 18, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825317000434112</td>
+            <td data-label="Total Amount">$136.32</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1SDMyjSS662l0_bqA1kFS3J_7nxqE2v7A/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 17, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251113090030400</td>
+            <td data-label="Total Amount">$1,580.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1c3MisaUc-KXyhuGyDfM-Elh6-AfpcQgO/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 17, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825316000302734</td>
+            <td data-label="Total Amount">$1,518.20</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1MvisihGw8ukjvTP-FtuawvdYPUzEaT9l/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 14, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705697564</td>
+            <td data-label="Total Amount">$3,467.20</td>
+            <td data-label="# of Claims">3 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1rswRYylGcIWsZwCK0UbFkW-6KN1UafKp/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 10, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251106090027582</td>
+            <td data-label="Total Amount">$1,580.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1CgFEtetrhoLO_iXMeox-y0OwF29jQqCP/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 10, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825309000493837</td>
+            <td data-label="Total Amount">$557.18</td>
+            <td data-label="# of Claims">1 claim</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1pnE-CaU10as1RM8mNFJ0knjQUQ2Nennv/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 07, 2025</td>
+            <td data-label="Payer">HEALTH OPTIONS, INC.</td>
+            <td data-label="Check/Trace #">705688827</td>
+            <td data-label="Total Amount">$3,964.80</td>
+            <td data-label="# of Claims">5 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1r-pL6XE7_-oW3tZVscNgEgrPBeDxvopq/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 06, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825307000215274</td>
+            <td data-label="Total Amount">$1,999.29</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1KdwDtZ2P38d6SNixTYc8SgbzlRdvlXCL/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Nov 03, 2025</td>
+            <td data-label="Payer">EVERNORTH BEHAVIORAL HEALTH, INC.</td>
+            <td data-label="Check/Trace #">251030090026589</td>
+            <td data-label="Total Amount">$1,504.00</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1sxShuumHCPFYbrLiwsBkcDarf7mOUjFw/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        
+        <tr>
+            <td data-label="Payment Date">Oct 31, 2025</td>
+            <td data-label="Payer">AETNA</td>
+            <td data-label="Check/Trace #">825301000479844</td>
+            <td data-label="Total Amount">$1,643.44</td>
+            <td data-label="# of Claims">2 claims</td>
+            <td data-label="Links" class="links-cell"><a href="https://drive.google.com/file/d/1od0Csw49yggPvrOAh0dL6tj53ZUfKsZf/view?usp=drivesdk" target="_blank">View EOB</a></td>
+        </tr>
+        </tbody>
+    </table>
+    
+    </div>
+    
+            </div>
+
+            <div id="global-footer"></div>
+        </div>
+
+        <script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    function openSubTab(evt, tabGroup, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName(tabGroup + "-sub-content");
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+        tablinks = document.getElementsByClassName(tabGroup + "-sub-tab");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+    function setupAccordions() {
+        var acc = document.getElementsByClassName("accordion-title");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") { panel.style.display = "none"; } else { panel.style.display = "block"; }
+            });
+        }
+    }
+    function filterTable(inputId, tableId) {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById(inputId);
+        filter = input.value.toUpperCase();
+        table = document.getElementById(tableId);
+        tr = table.getElementsByTagName("tr");
+        for (i = 1; i < tr.length; i++) {
+            tr[i].style.display = "none";
+            td = tr[i].getElementsByTagName("td");
+            for (var j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) { tr[i].style.display = ""; break; }
+                }
+            }
+        }
+    }
+    function loadSharedHeader() {
+        return fetch('/shared/header.html')
+            .then(r => r.text())
+            .then(html => {
+                var target = document.getElementById('global-header');
+                if (target) target.innerHTML = html;
+            });
+    }
+
+    function loadSharedFooter() {
+        return fetch('/shared/footer.html')
+            .then(r => r.text())
+            .then(html => {
+                var target = document.getElementById('global-footer');
+                if (target) {
+                    target.innerHTML = html;
+                    var yearSpan = document.getElementById('copyright-year');
+                    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+                }
+            });
+    }
+
+    function initUserMenu() {
+        fetch('/auth/me')
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Not authenticated');
+            })
+            .then(user => {
+                var placeholder = document.getElementById('user-menu-placeholder');
+                if (!placeholder) return;
+
+                var avatar = user.picture || '';
+                var initial = user.name ? user.name.charAt(0) : 'U';
+
+                var html = `
+                <div class="group relative">
+                    <button class="flex items-center gap-3 focus:outline-none hover:opacity-100 transition-opacity py-2 text-white">
+                        <span class="hidden md:inline">${user.name}</span>
+                        ${avatar ?
+                            `<img src="${avatar}" alt="User" class="w-8 h-8 rounded-full border-2 border-white/50">` :
+                            `<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/50"><span class="text-xs">${initial}</span></div>`
+                        }
+                        <span class="text-xs opacity-75">▼</span>
+                    </button>
+                    <div class="absolute top-full pt-2 w-48 hidden group-hover:block z-50
+                                left-1/2 -translate-x-1/2
+                                md:left-auto md:translate-x-0 md:right-0
+                                origin-top md:origin-top-right">
+                        <div class="bg-white rounded-lg shadow-xl py-1 text-gray-800 border border-gray-100 text-left">
+                            <div class="px-4 py-2 border-b border-gray-100 text-xs text-gray-500">
+                                Signed in as <br><strong class="text-gray-700">${user.name}</strong>
+                            </div>
+                            <a href="/auth/logout" class="block px-4 py-2 text-red-600 hover:bg-red-50 text-sm no-underline">Sign Out</a>
+                        </div>
+                    </div>
+                </div>`;
+
+                placeholder.innerHTML = html;
+            })
+            .catch(err => console.log('User not logged in', err));
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("tab-active").style.display = "block";
+        document.getElementsByClassName("tab-button")[0].className += " active";
+        var paidSub = document.getElementById("paid-claims");
+        if(paidSub) paidSub.style.display = "block";
+        var archiveSub = document.getElementById("archive-claims");
+        if(archiveSub) archiveSub.style.display = "block";
+        setupAccordions();
+
+        loadSharedHeader().then(initUserMenu);
+        loadSharedFooter();
+    });
+    </script>
+    </body>
+    </html>
+    
