@@ -103,11 +103,11 @@ server {
 
     location /payroll {
     proxy_pass http://127.0.0.1:8082;
-    
+
     auth_request_set $user_email $upstream_http_x_user_email;
     auth_request_set $user_name $upstream_http_x_user_name;
     auth_request_set $user_picture $upstream_http_x_user_picture;
-    
+
     proxy_set_header X-User-Email $user_email;
     proxy_set_header X-User-Name $user_name;
     proxy_set_header X-User-Picture $user_picture;
@@ -116,6 +116,28 @@ server {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # --- 8. Mission Control (Financial Pulse) ---
+    location /mission-control/ {
+        proxy_pass http://127.0.0.1:8092/mission-control/;
+
+        # Pass User Info Headers from Auth Service
+        auth_request_set $user_email $upstream_http_x_user_email;
+        auth_request_set $user_name $upstream_http_x_user_name;
+        auth_request_set $user_picture $upstream_http_x_user_picture;
+
+        proxy_set_header X-User-Email $user_email;
+        proxy_set_header X-User-Name $user_name;
+        proxy_set_header X-User-Picture $user_picture;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_read_timeout 60s;
+        proxy_connect_timeout 60s;
     }
 
 }
